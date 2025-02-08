@@ -1,0 +1,104 @@
+import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select, WebDriverWait
+
+
+def initialize_driver():
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    driver.implicitly_wait(5)
+    driver.get("https://rahulshettyacademy.com/angularpractice/")
+    return driver
+
+
+def fill_form(driver):
+    driver.find_element(By.NAME, "name").send_keys("Sibun Katuala")
+    driver.find_element(By.NAME, "email").send_keys("sibunkatuala@gmail.com")
+    driver.find_element(By.ID, "exampleInputPassword1").send_keys("12345")
+    driver.find_element(By.ID, "exampleCheck1").click()
+
+
+def select_dropdown(driver):
+    dropdown_element = driver.find_element(By.ID, "exampleFormControlSelect1")
+    dropdown = Select(dropdown_element)
+    dropdown.select_by_index(1) 
+
+
+def select_radio_button(driver):
+    driver.find_element(By.ID, "inlineRadio2").click()
+
+
+def enter_dob(driver, dob):
+    driver.find_element(By.NAME, "bday").send_keys(dob)
+
+
+def submit_form(driver):
+    driver.find_element(By.XPATH, "//input[@type='submit']").click()
+    message = driver.find_element(By.CLASS_NAME, "alert-success").text
+    print(message)
+    assert "Success! The Form has been submitted successfully!" in message
+
+
+def update_name_field(driver, new_name):
+    name_field = driver.find_element(By.NAME, "name")
+    name_field.clear()
+    name_field.send_keys(new_name)
+
+def click_shop(driver):
+    driver.find_element(By.CSS_SELECTOR, "a[href*='shop']").click()
+
+
+def add_product_to_cart(driver, product_name):
+    products = driver.find_elements(By.XPATH, "//div[@class='card h-100']")
+    for product in products:
+        product_name_text = product.find_element(By.XPATH, "div/h4/a").text
+        if product_name_text == product_name:
+            product.find_element(By.XPATH, "div/button").click()
+            break
+
+def proceed_to_checkout(driver):
+    driver.find_element(By.CSS_SELECTOR, "a[class*='btn-primary']").click()
+    driver.find_element(By.XPATH, "//button[@class='btn btn-success']").click()
+
+def select_country(driver, country_name):
+    driver.find_element(By.ID, "country").send_keys(country_name[:3])  # Enter partial name for dropdown suggestion
+    wait = WebDriverWait(driver, 10)
+    wait.until(EC.presence_of_element_located((By.LINK_TEXT, country_name)))
+    driver.find_element(By.LINK_TEXT, country_name).click()
+
+
+def complete_purchase(driver):
+    driver.find_element(By.XPATH, "//div[@class='checkbox checkbox-primary']").click()
+    driver.find_element(By.CSS_SELECTOR, "input[class='btn btn-success btn-lg']").click()
+    success_text = driver.find_element(By.CLASS_NAME, "alert-success").text
+    print(success_text)
+    assert "Success! Thank you!" in success_text
+
+
+def close_driver(driver):
+    time.sleep(5) 
+    driver.quit()
+
+
+def main():
+    driver = initialize_driver()
+    try:
+        fill_form(driver)
+        select_dropdown(driver)
+        select_radio_button(driver)
+        enter_dob(driver, "2001-02-24")
+        submit_form(driver)
+        update_name_field(driver, "Hello again")
+        click_shop(driver)
+        add_product_to_cart(driver, "iphone X")
+        proceed_to_checkout(driver)
+        select_country(driver, "India")
+        complete_purchase(driver)
+    finally:
+        close_driver(driver)
+
+
+if __name__ == "__main__":
+    main()
